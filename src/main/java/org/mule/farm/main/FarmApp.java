@@ -1,10 +1,15 @@
 package org.mule.farm.main;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
+
 import org.apache.maven.repository.internal.DefaultServiceLocator;
-import org.apache.maven.repository.internal.MavenRepositorySystemSession;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.providers.http.HttpWagon;
 import org.codehaus.cargo.container.ContainerType;
@@ -21,14 +26,11 @@ import org.codehaus.cargo.util.log.SimpleLogger;
 import org.sonatype.aether.RepositorySystem;
 import org.sonatype.aether.RepositorySystemSession;
 import org.sonatype.aether.artifact.Artifact;
+import org.sonatype.aether.artifact.ArtifactType;
 import org.sonatype.aether.connector.wagon.WagonProvider;
 import org.sonatype.aether.connector.wagon.WagonRepositoryConnectorFactory;
-import org.sonatype.aether.repository.LocalRepository;
-import org.sonatype.aether.resolution.ArtifactRequest;
-import org.sonatype.aether.resolution.ArtifactResolutionException;
-import org.sonatype.aether.resolution.ArtifactResult;
 import org.sonatype.aether.spi.connector.RepositoryConnectorFactory;
-import org.sonatype.aether.util.artifact.DefaultArtifact;
+import org.sonatype.aether.transfer.ArtifactNotFoundException;
 
 /**
  * Hello world!
@@ -36,19 +38,52 @@ import org.sonatype.aether.util.artifact.DefaultArtifact;
  */
 
 public class FarmApp {
-	public static String fetchRemote(String name, String url)
+	public static final int ANIMAL_NOT_FOUND_ERROR = -1;
+	public static final int SUCCESS = -1;
+
+	public static Installer fetchRemote(String name, String url)
 			throws MalformedURLException {
-		Installer installer = new ZipURLInstaller(new URL(url));
+		Installer installer = new ZipURLInstaller(new URL("file://" + url));
 		Logger logger = new SimpleLogger();
 		logger.setLevel(LogLevel.DEBUG);
 		installer.setLogger(logger);
+
 		installer.install();
 
-		String tomcatHome = "." + File.separator + name;
+		return installer;
+	}
 
-		new File(installer.getHome()).renameTo(new File(tomcatHome));
+	public static void copy(String origin, String destiny) {
+		File inputFile = new File(origin);
+		File outputFile = new File(destiny);
 
-		return tomcatHome;
+		FileReader in = null;
+		FileWriter out = null;
+
+		try {
+			in = new FileReader(inputFile);
+			out = new FileWriter(outputFile);
+
+			int c;
+
+			while ((c = in.read()) != ANIMAL_NOT_FOUND_ERROR)
+				out.write(c);
+
+			in.close();
+			out.close();
+
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			throw new RuntimeException();
+		} catch (IOException e) {
+			e.printStackTrace();
+			throw new RuntimeException();
+		}
+
+	}
+
+	public static void move(String origin, String destiny) {
+		new File(origin).renameTo(new File(destiny));
 	}
 
 	public static void start(String path) {
@@ -75,13 +110,13 @@ public class FarmApp {
 		}
 
 		public void release(Wagon wagon) {
-
 		}
 
 	}
 
-	private static RepositorySystem newRepositorySystem() {
+	static RepositorySystem newRepositorySystem() {
 		DefaultServiceLocator locator = new DefaultServiceLocator();
+
 		locator.setServices(WagonProvider.class, new ManualWagonProvider());
 
 		locator.addService(RepositoryConnectorFactory.class,
@@ -89,92 +124,46 @@ public class FarmApp {
 
 		return locator.getService(RepositorySystem.class);
 	}
+	
+	public static int trueMainWithRepo(String [] args, String repoPath) {
 
-	private static RepositorySystemSession newSession(RepositorySystem system) {
-		MavenRepositorySystemSession session = new MavenRepositorySystemSession();
-
-		LocalRepository localRepo = new LocalRepository(
-				"/Users/apose/.m2/repository");
-		session.setLocalRepositoryManager(system
-				.newLocalRepositoryManager(localRepo));
-
-		return session;
-	}
-
-	public static Artifact fetch(RepositorySystem repoSystem,
-			RepositorySystemSession session, Artifact artifact) {
-
-		if (artifact == null) {
-			throw new IllegalArgumentException();
-		}		
-		
-		ArtifactRequest artifactRequest = new ArtifactRequest();
-		
-		artifactRequest.setArtifact(artifact);
-		// artifactRequest.addRepository( new RemoteRepository( "mule",
-		// "default",
-		// "http://dev.ee.mulesource.com/repository/content/repositories/releases"
-		// ) );
+		if (args.length < 2) {
+			System.err.println("Invalid parameters");
+			return -3;
+		}
+		FarmRepo farmRepo;
+		farmRepo = new FarmRepo(repoPath);
+		Artifact artifact = null;
 
 		try {
-			ArtifactResult artifactResult = repoSystem.resolveArtifact(session,
-					artifactRequest);
-			artifact = artifactResult.getArtifact();
-		} catch (ArtifactResolutionException e) {
-			fetchRemote()
+			if ("breed".equals(args[1])) {
+				artifact = farmRepo.breed(args[2]);
+			} else if ("herd".equals(args[1])) {
+				artifact = farmRepo.herd(args[2]);
+			} else if("summon".equals(args[1])) {
+				String [] args2Parts = args[2].split("@");
+				if ( args2Parts.length != 2 ) {
+					System.err.println("Version should be specified");
+					return -2;
+				}
+				artifact = farmRepo.summon(args2Parts[0], args2Parts[1], args[3]);
+			}
+		} catch (ArtifactNotRegisteredException e) {
+			System.err.println("Error: Artifact not registered.");
+			return ANIMAL_NOT_FOUND_ERROR;
 		}
 
-		return artifact;
+		System.err.println("Loaded " + artifact);
+		return 0;
+		
+	}
+	
+	public static int trueMain(String [] args) {
+		return trueMainWithRepo(args, System.getProperty("user.home") + File.separator + ".m2");
 	}
 
 	public static void main(String[] args) {
-		RepositorySystem repoSystem = newRepositorySystem();
-		
-		RepositorySystemSession session = newSession(repoSystem);
-		Artifact tomcatArtifact = fetch(repoSystem, session, new DefaultArtifact("org.mule.farm",
-				"tomcat-packed", "zip", "6.0.32"));
-
-		Artifact artifact = fetch(repoSystem, session, new DefaultArtifact("com.mulesoft.mmc",
-				"mule-ee-distribution-standalone-mmc", "zip", "3.1.1"));
-		
-		//
-		// Artifact jarArtifact = new DefaultArtifact( "org.mule.farm",
-		// "tomcat-packed", "zip", "6.0.32" );
-		// jarArtifact = jarArtifact.setFile( new File(
-		// "apache-tomcat-6.0.32.zip" ) );
-		//
-		// InstallRequest installRequest = new InstallRequest();
-		// installRequest.addArtifact( jarArtifact ).addArtifact( jarArtifact );
-		//
-		// try {
-		// repoSystem.install( session, installRequest );
-		// } catch (InstallationException e) {
-		// e.printStackTrace();
-		// }
-		System.out.println(tomcatArtifact.getFile());
-		System.out.println(artifact.getFile());
-
-		// Map<String, String> urlMap = new HashMap<String, String>();
-		//
-		// //
-		// http://apache.xmundo.com.ar/tomcat/tomcat-6/v6.0.32/bin/apache-tomcat-6.0.32.zip
-		// urlMap.put("tomcat6x", "file://.Ê/apache-tomcat-6.0.32.zip");
-		// urlMap.put(
-		// "jboss5x",
-		// "http://downloads.sourceforge.net/project/jboss/JBoss/JBoss-5.0.1.GA/jboss-5.0.1.GA.zip");
-		// urlMap.put(
-		// "jboss4x",
-		// "http://sourceforge.net/projects/jboss/files/JBoss/JBoss-4.2.2.GA/jboss-4.2.2.GA.zip");
-		// String url = urlMap.get("tomcat6x");
-		// Logger logger = new SimpleLogger();
-		// try {
-		// start(install("tomcat6x", url));
-		//
-		// // configuration.addDeployable(new WAR("cargo.war"));
-		//
-		// } catch (MalformedURLException e) {
-		// e.printStackTrace();
-		// }
-
+		System.exit(trueMain(args));
 	}
+
 }
