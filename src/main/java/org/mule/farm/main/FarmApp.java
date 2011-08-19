@@ -7,7 +7,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Arrays;
+import java.util.Collection;
 
 import org.apache.maven.repository.internal.DefaultServiceLocator;
 import org.apache.maven.wagon.Wagon;
@@ -24,22 +24,15 @@ import org.codehaus.cargo.util.log.LogLevel;
 import org.codehaus.cargo.util.log.Logger;
 import org.codehaus.cargo.util.log.SimpleLogger;
 import org.sonatype.aether.RepositorySystem;
-import org.sonatype.aether.RepositorySystemSession;
 import org.sonatype.aether.artifact.Artifact;
-import org.sonatype.aether.artifact.ArtifactType;
 import org.sonatype.aether.connector.wagon.WagonProvider;
 import org.sonatype.aether.connector.wagon.WagonRepositoryConnectorFactory;
 import org.sonatype.aether.spi.connector.RepositoryConnectorFactory;
-import org.sonatype.aether.transfer.ArtifactNotFoundException;
-
-/**
- * Hello world!
- * 
- */
 
 public class FarmApp {
+	private static final int VERSION_NOT_SPECIFIED_ERROR = -2;
 	public static final int ANIMAL_NOT_FOUND_ERROR = -1;
-	public static final int SUCCESS = -1;
+	public static final int SUCCESS = 0;
 
 	public static Installer fetchRemote(String name, String url)
 			throws MalformedURLException {
@@ -124,8 +117,8 @@ public class FarmApp {
 
 		return locator.getService(RepositorySystem.class);
 	}
-	
-	public static int trueMainWithRepo(String [] args, String repoPath) {
+
+	public static int trueMainWithRepo(String[] args, String repoPath) {
 
 		if (args.length < 2) {
 			System.err.println("Invalid parameters");
@@ -140,13 +133,28 @@ public class FarmApp {
 				artifact = farmRepo.breed(args[2]);
 			} else if ("herd".equals(args[1])) {
 				artifact = farmRepo.herd(args[2]);
-			} else if("summon".equals(args[1])) {
-				String [] args2Parts = args[2].split("@");
-				if ( args2Parts.length != 2 ) {
+			} else if ("summon".equals(args[1])) {
+				String[] args2Parts = args[2].split("@");
+				if (args2Parts.length != 2) {
 					System.err.println("Version should be specified");
-					return -2;
+					return VERSION_NOT_SPECIFIED_ERROR;
 				}
-				artifact = farmRepo.summon(args2Parts[0], args2Parts[1], args[3]);
+				artifact = farmRepo.summon(args2Parts[0], args2Parts[1],
+						args[3]);
+			} else if ("list".equals(args[1])) {
+				Collection<Artifact> animals = farmRepo.list();
+				
+				if (animals.size() == 0) {
+					System.err.println("No results found.");
+					return SUCCESS;
+				}
+				
+				System.err.println("Available animals:");
+				
+				for ( Artifact animal : animals) {
+					System.err.println(animal.getArtifactId() + " - " + animal.getFile().toString());
+				}
+				return SUCCESS;
 			}
 		} catch (ArtifactNotRegisteredException e) {
 			System.err.println("Error: Artifact not registered.");
@@ -154,12 +162,13 @@ public class FarmApp {
 		}
 
 		System.err.println("Loaded " + artifact);
-		return 0;
-		
+		return SUCCESS;
+
 	}
-	
-	public static int trueMain(String [] args) {
-		return trueMainWithRepo(args, System.getProperty("user.home") + File.separator + ".m2");
+
+	public static int trueMain(String[] args) {
+		return trueMainWithRepo(args, System.getProperty("user.home")
+				+ File.separator + ".m2");
 	}
 
 	public static void main(String[] args) {

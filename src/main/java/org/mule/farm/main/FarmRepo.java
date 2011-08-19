@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FilenameFilter;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -38,7 +39,7 @@ public class FarmRepo {
 	private MavenRepositorySystemSession session;
 	private Map<String, Artifact> artifacts;
 
-	public FarmRepo(String repoPath) throws EmptyOrInvalidRepoException {
+	public FarmRepo(String repoPath) {
 
 		session = new MavenRepositorySystemSession();
 
@@ -53,12 +54,8 @@ public class FarmRepo {
 				+ File.separator + "farm" + File.separator + "animals");
 
 		animalsPath.mkdirs();
-		
-		File[] animals = animalsPath.listFiles(new DirectoryFilter());
 
-		if (animals == null) {
-			throw new EmptyOrInvalidRepoException("Empty or Invalid repo");
-		}
+		File[] animals = animalsPath.listFiles(new DirectoryFilter());
 
 		for (File animal : animals) {
 			for (File version : animal.listFiles(new DirectoryFilter())) {
@@ -87,38 +84,16 @@ public class FarmRepo {
 							arrayWithVersionAndExtension.length - 1,
 							arrayWithVersionAndExtension.length), "");
 
-					add(artifactId, new DefaultArtifact(
+					Artifact artifact = new DefaultArtifact(
 							"org.mule.farm.animals", artifactId, artifactType,
-							artifactVersion));
+							artifactVersion);
+					
+					
+					
+					add(artifactId, retrieveArtifactWithRequest(artifact));
 				}
 			}
 		}
-
-		// addAndInstall("tomcat6x", "./apache-tomcat-6.0.32.zip",
-		// new DefaultArtifact("org.mule.farm", "tomcat6x", "zip",
-		// "6.0.32"));
-		// addAndInstall("tomcat7x", "./apache-tomcat-7.0.20.zip",
-		// new DefaultArtifact("org.mule.farm", "tomcat7x", "zip",
-		// "7.0.20"));
-		//
-		// addAndInstall("jboss6x", "./jboss-as-distribution-6.1.0.Final.zip",
-		// new DefaultArtifact("org.mule.farm", "jboss6x", "zip", "6.1.0"));
-		// addAndInstall("jboss5x", "./jboss-5.1.0.GA.zip", new DefaultArtifact(
-		// "org.mule.farm", "jboss5x", "zip", "5.1.0"));
-		// // addAndInstall("jboss4x", "./jboss-4.2.3.GA.zip",
-		// // new DefaultArtifact("org.mule.farm", "jboss4x", "zip",
-		// // "4.2.3"));
-		//
-		// add("mmc-mule-app", new DefaultArtifact("com.mulesoft.mmc",
-		// "mmc-mule-app", "zip", "3.2.0-SNAPSHOT"));
-		//
-		// add("mmc-server", new DefaultArtifact("com.mulesoft.mmc",
-		// "mmc-server",
-		// "war", "3.2.0-SNAPSHOT"));
-		//
-		// add("mule-ee-distribution-standalone-mmc", new DefaultArtifact(
-		// "com.mulesoft.mmc", "mule-ee-distribution-standalone-mmc",
-		// "zip", "3.2.0-SNAPSHOT"));
 
 	}
 
@@ -157,6 +132,10 @@ public class FarmRepo {
 			throw new ArtifactNotRegisteredException();
 		}
 
+		return retrieveArtifactWithRequest(artifact);
+	}
+
+	private Artifact retrieveArtifactWithRequest(Artifact artifact) {
 		ArtifactRequest artifactRequest = new ArtifactRequest();
 
 		artifactRequest.setArtifact(artifact);
@@ -205,6 +184,10 @@ public class FarmRepo {
 	public Artifact summon(String alias, String version, String url) {
 		return addAndInstall(alias, url, new DefaultArtifact(
 				"org.mule.farm.animals", alias, "zip", version));
+	}
+
+	public Collection<Artifact> list() {
+		return artifacts.size() == 0 ? new ArrayList<Artifact>() : artifacts.values();
 	}
 
 }

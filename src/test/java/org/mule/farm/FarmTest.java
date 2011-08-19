@@ -1,6 +1,6 @@
 package org.mule.farm;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -84,24 +84,32 @@ public class FarmTest {
 
 	@Test
 	public void testJBoss5x() {
+		callFarmAppMainWithRepo("repo_eraseme", "", "summon",
+				"jboss6x@6.1.0", "jboss-6.1.0.GA.zip");
 		callFarmAppMain("", "breed", "jboss5x");
 		assertFolderExistence("jboss5x");
 	}
 
 	@Test
 	public void testJBoss6x() {
+		callFarmAppMainWithRepo("repo_eraseme", "", "summon",
+				"jboss6x@6.1.0", "jboss-6.1.0.GA.zip");
 		callFarmAppMain("", "breed", "jboss6x");
 		assertFolderExistence("jboss6x");
 	}
 
 	@Test
 	public void testJTomcat6x() {
+		callFarmAppMainWithRepo("repo_eraseme", "", "summon",
+				"tomcat6x@6.0.32", "apache-tomcat-6.0.32.zip");
 		callFarmAppMain("", "breed", "tomcat6x");
 		assertFolderExistence("tomcat6x");
 	}
 
 	@Test
 	public void testJTomcat7x() {
+		callFarmAppMainWithRepo("repo_eraseme", "", "summon",
+				"tomcat7x@6.0.20", "apache-tomcat-7.0.20.zip");
 		callFarmAppMain("", "breed", "tomcat7x");
 		assertFolderExistence("tomcat7x");
 	}
@@ -116,6 +124,18 @@ public class FarmTest {
 
 		callFarmAppMain("", "herd", "mmc-mule-app");
 		assertFileExistenceWithRegex("mmc-mule-app.*\\.zip");
+	}
+	
+	@Test
+	public void testList() {
+		callFarmAppMainWithRepo("repo_eraseme", "", "list");
+		
+		callFarmAppMainWithRepo("repo_eraseme", "", "summon",
+				"jboss6x@6.1.0", "jboss-6.1.0.GA.zip");
+		callFarmAppMainWithRepo("repo_eraseme", "", "summon",
+				"tomcat7x@7.0.20", "apache-tomcat-7.0.20.zip");
+		
+		callFarmAppMainWithRepo("repo_eraseme", "", "list");
 	}
 
 	private void assertFileExistenceWithRegex(String regex) {
@@ -138,6 +158,7 @@ public class FarmTest {
 		fail(String.format("Files with the regex [%s] were not found", regex));
 	}
 
+	@SuppressWarnings("unused")
 	private void assertFileExistence(String fileName) {
 		File file = new File("." + File.separator + fileName);
 		assertTrue(String.format("Path [%s] does not exist", fileName),
