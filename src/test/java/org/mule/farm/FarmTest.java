@@ -12,6 +12,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mule.farm.main.FarmApp;
 
+import com.sun.xml.internal.ws.developer.MemberSubmissionAddressing;
+
 public class FarmTest {
 
 	private void createFolder(String name) {
@@ -68,23 +70,23 @@ public class FarmTest {
 	public void testJBoss4x() {
 		assertEquals("As the repo is new, nothing must be found here",
 				FarmApp.ANIMAL_NOT_FOUND_ERROR,
-				callFarmAppMainWithRepo("repo_eraseme", "", "breed", "jboss4x"));
+				callFarmAppMainWithRepo("repo_eraseme", "breed", "jboss4x"));
 
 		assertEquals(
 				"Adding JBoss4x to the repo",
 				FarmApp.SUCCESS,
-				callFarmAppMainWithRepo("repo_eraseme", "", "summon",
+				callFarmAppMainWithRepo("repo_eraseme", "summon",
 						"jboss4x@4.2.3", "jboss-4.2.3.GA.zip"));
 
 		assertEquals("Now I should retrieve JBoss4x successfully", FarmApp.SUCCESS,
-				callFarmAppMainWithRepo("repo_eraseme", "", "breed", "jboss4x"));
+				callFarmAppMainWithRepo("repo_eraseme", "breed", "jboss4x"));
 
 		assertFolderExistence("jboss4x");
 	}
 
 	@Test
 	public void testJBoss5x() {
-		callFarmAppMainWithRepo("repo_eraseme", "", "summon",
+		callFarmAppMainWithRepo("repo_eraseme", "summon",
 				"jboss6x@6.1.0", "jboss-6.1.0.GA.zip");
 		callFarmAppMain("", "breed", "jboss5x");
 		assertFolderExistence("jboss5x");
@@ -92,7 +94,7 @@ public class FarmTest {
 
 	@Test
 	public void testJBoss6x() {
-		callFarmAppMainWithRepo("repo_eraseme", "", "summon",
+		callFarmAppMainWithRepo("repo_eraseme", "summon",
 				"jboss6x@6.1.0", "jboss-6.1.0.GA.zip");
 		callFarmAppMain("", "breed", "jboss6x");
 		assertFolderExistence("jboss6x");
@@ -100,7 +102,7 @@ public class FarmTest {
 
 	@Test
 	public void testJTomcat6x() {
-		callFarmAppMainWithRepo("repo_eraseme", "", "summon",
+		callFarmAppMainWithRepo("repo_eraseme", "summon",
 				"tomcat6x@6.0.32", "apache-tomcat-6.0.32.zip");
 		callFarmAppMain("", "breed", "tomcat6x");
 		assertFolderExistence("tomcat6x");
@@ -108,7 +110,7 @@ public class FarmTest {
 
 	@Test
 	public void testJTomcat7x() {
-		callFarmAppMainWithRepo("repo_eraseme", "", "summon",
+		callFarmAppMainWithRepo("repo_eraseme", "summon",
 				"tomcat7x@6.0.20", "apache-tomcat-7.0.20.zip");
 		callFarmAppMain("", "breed", "tomcat7x");
 		assertFolderExistence("tomcat7x");
@@ -128,14 +130,14 @@ public class FarmTest {
 	
 	@Test
 	public void testList() {
-		callFarmAppMainWithRepo("repo_eraseme", "", "list");
+		callFarmAppMainWithRepo("repo_eraseme", "list");
 		
-		callFarmAppMainWithRepo("repo_eraseme", "", "summon",
+		callFarmAppMainWithRepo("repo_eraseme", "summon",
 				"jboss6x@6.1.0", "jboss-6.1.0.GA.zip");
-		callFarmAppMainWithRepo("repo_eraseme", "", "summon",
+		callFarmAppMainWithRepo("repo_eraseme", "summon",
 				"tomcat7x@7.0.20", "apache-tomcat-7.0.20.zip");
 		
-		callFarmAppMainWithRepo("repo_eraseme", "", "list");
+		callFarmAppMainWithRepo("repo_eraseme", "list");
 	}
 
 	private void assertFileExistenceWithRegex(String regex) {

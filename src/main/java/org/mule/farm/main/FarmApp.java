@@ -120,7 +120,7 @@ public class FarmApp {
 
 	public static int trueMainWithRepo(String[] args, String repoPath) {
 
-		if (args.length < 2) {
+		if (args.length < 1) {
 			System.err.println("Invalid parameters");
 			return -3;
 		}
@@ -129,19 +129,19 @@ public class FarmApp {
 		Artifact artifact = null;
 
 		try {
-			if ("breed".equals(args[1])) {
-				artifact = farmRepo.breed(args[2]);
-			} else if ("herd".equals(args[1])) {
-				artifact = farmRepo.herd(args[2]);
-			} else if ("summon".equals(args[1])) {
-				String[] args2Parts = args[2].split("@");
+			if ("breed".equals(args[0])) {
+				artifact = farmRepo.breed(args[1]);
+			} else if ("herd".equals(args[0])) {
+				artifact = farmRepo.herd(args[1]);
+			} else if ("summon".equals(args[0])) {
+				String[] args2Parts = args[1].split("@");
 				if (args2Parts.length != 2) {
 					System.err.println("Version should be specified");
 					return VERSION_NOT_SPECIFIED_ERROR;
 				}
 				artifact = farmRepo.summon(args2Parts[0], args2Parts[1],
-						args[3]);
-			} else if ("list".equals(args[1])) {
+						args[2]);
+			} else if ("list".equals(args[0])) {
 				Collection<Artifact> animals = farmRepo.list();
 				
 				if (animals.size() == 0) {
