@@ -1,8 +1,9 @@
 # Farm
-An easy way of retrieving Maven artifacts.
+The missing package manager for Java.
 
 ## Get
-´get´ allows you to retrieve a saved animal.
+`get` allows you to retrieve a saved animal.
+
     $ farm get tomcat6x
     $ ls
     tomcat6x-6.1.0.zip
@@ -16,17 +17,17 @@ An easy way of retrieving Maven artifacts.
     $ farm get muleee@3.2.0
     $ farm get tomcat6x@6.0.31
 
-By default, ´get´ fetches the latest version if it is not provided.
+By default, `get` fetches the latest version if it is not provided.
 
 ## Install
-´install´ is similar to ´get´ but it only works on containers. As the name suggests, the container is set up and ready to run.
+`install` is similar to `get` but it only works on containers. As the name suggests, the container is set up and ready to run.
 
     $ farm install tomcat6x
     $ ls
     tomcat6x/
 
 ## Put
-Nice, but how I manage to add new animals? Here comes ´put´ to the rescue.
+Nice, but how I manage to add new animals? Here comes `put` to the rescue.
 
     $ farm put tomcat6x apache-tomcat-6.0.32.zip
     Adding tomcat6x using "6.0.32" as the animal version
