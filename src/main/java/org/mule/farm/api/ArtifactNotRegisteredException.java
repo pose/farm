@@ -1,4 +1,4 @@
-package org.mule.farm.main;
+package org.mule.farm.api;
 
 public class ArtifactNotRegisteredException extends Exception {
 

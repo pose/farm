@@ -1,4 +1,4 @@
-package org.mule.farm.main;
+package org.mule.farm.impl;
 
 import static org.mule.farm.util.Util.copy;
 
@@ -38,6 +38,7 @@ import org.codehaus.cargo.util.log.LogLevel;
 import org.codehaus.cargo.util.log.Logger;
 import org.codehaus.cargo.util.log.SimpleLogger;
 import org.mule.farm.api.Animal;
+import org.mule.farm.api.ArtifactNotRegisteredException;
 import org.mule.farm.api.FarmRepository;
 import org.sonatype.aether.RepositorySystem;
 import org.sonatype.aether.artifact.Artifact;

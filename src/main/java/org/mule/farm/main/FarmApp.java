@@ -1,35 +1,22 @@
 package org.mule.farm.main;
 
 import java.io.File;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.Collection;
 
+import org.mule.cli.CLI;
+import org.mule.cli.annotations.Command;
+import org.mule.cli.annotations.OnException;
 import org.mule.farm.api.Animal;
+import org.mule.farm.api.ArtifactNotRegisteredException;
 import org.mule.farm.api.FarmRepository;
+import org.mule.farm.impl.FarmRepositoryImpl;
+
 
 public class FarmApp {
 
-	@Retention(RetentionPolicy.RUNTIME)
-	public @interface Command {
-	}
-
-	@Retention(RetentionPolicy.RUNTIME)
-	public @interface OnException {
-		Class<? extends Exception> value();
-
-		String message();
-
-		int returnCode();
-	}
-
-	public static final int INVALID_PARAMETERS = -3;
 	public static final int VERSION_NOT_SPECIFIED_ERROR = -2;
-	public static final int ANIMAL_NOT_FOUND_ERROR = -1;
-	public static final int SUCCESS = 0;
+	public static final int ANIMAL_NOT_FOUND_ERROR = -3;
+	
 	private FarmRepository farmRepo;
 
 	private FarmApp(String repoPath) {
@@ -90,46 +77,10 @@ public class FarmApp {
 	}
 
 	public static int trueMainWithRepo(String[] args, String repoPath) {
-
-		if (args.length < 1) {
-			System.err.println("Invalid parameters");
-			return INVALID_PARAMETERS;
-		}
-
 		FarmApp farmApp = new FarmApp(repoPath);
-		for (Method method : FarmApp.class.getMethods()) {
-			if (method.isAnnotationPresent(Command.class)
-					&& method.getName().equals(args[0])
-					&& method.getParameterTypes().length == args.length - 1) {
-				try {
-					method.invoke(farmApp,
-							(Object[]) Arrays.copyOfRange(args, 1, args.length));
-					return SUCCESS;
-				} catch (IllegalArgumentException e) {
-					e.printStackTrace();
-				} catch (IllegalAccessException e) {
-					e.printStackTrace();
-				} catch (InvocationTargetException e) {
-					if (method.isAnnotationPresent(OnException.class)) {
-						OnException annotation = method
-								.getAnnotation(OnException.class);
-						if (annotation != null
-								&& annotation.value().equals(
-										e.getCause().getClass())) {
-							System.err.println(annotation.message());
-							return annotation.returnCode();
-						}
-					}
-
-					e.printStackTrace();
-				}
-			}
-		}
-
-		// TODO Add how should valid parameters be
-		System.err.println("Error: Invalid parameters.");
-		return FarmApp.INVALID_PARAMETERS;
-
+		CLI<FarmApp> cli = new CLI<FarmApp>(farmApp);
+		
+		return cli.runCommandLine(args);
 	}
 
 	public static int trueMain(String[] args) {

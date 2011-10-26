@@ -1,4 +1,4 @@
-package org.mule.farm.main;
+package org.mule.farm.impl;
 
 import org.apache.commons.lang3.Validate;
 import org.mule.farm.api.Animal;

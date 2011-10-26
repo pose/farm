@@ -1,4 +1,4 @@
-package org.mule.farm.main;
+package org.mule.farm.impl;
 
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.providers.http.HttpWagon;

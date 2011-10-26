@@ -2,7 +2,6 @@ package org.mule.farm.api;
 
 import java.util.Collection;
 
-import org.mule.farm.main.ArtifactNotRegisteredException;
 
 public interface FarmRepository {
 
