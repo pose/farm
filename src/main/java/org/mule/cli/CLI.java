@@ -46,7 +46,6 @@ public class CLI<T> {
 	 */
 	public CLI(T instance) {
 		Validate.notNull(instance);
-		Validate.notNull(klass);
 
 		this.instance = instance;
 		this.klass = instance.getClass();
