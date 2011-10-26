@@ -1,4 +1,4 @@
-package org.mule.cli.annotations;
+package org.mule.barn.annotations;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

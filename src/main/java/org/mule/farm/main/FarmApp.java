@@ -3,9 +3,9 @@ package org.mule.farm.main;
 import java.io.File;
 import java.util.Collection;
 
-import org.mule.cli.CLI;
-import org.mule.cli.annotations.Command;
-import org.mule.cli.annotations.OnException;
+import org.mule.barn.Barn;
+import org.mule.barn.annotations.Command;
+import org.mule.barn.annotations.OnException;
 import org.mule.farm.api.Animal;
 import org.mule.farm.api.ArtifactNotRegisteredException;
 import org.mule.farm.api.FarmRepository;
@@ -78,7 +78,7 @@ public class FarmApp {
 
 	public static int trueMainWithRepo(String[] args, String repoPath) {
 		FarmApp farmApp = new FarmApp(repoPath);
-		CLI<FarmApp> cli = new CLI<FarmApp>(farmApp);
+		Barn<FarmApp> cli = new Barn<FarmApp>(farmApp, "farm");
 		
 		return cli.runCommandLine(args);
 	}

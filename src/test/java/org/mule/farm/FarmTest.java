@@ -9,7 +9,7 @@ import java.io.PrintStream;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mule.cli.CLI;
+import org.mule.barn.Barn;
 import org.mule.farm.main.FarmApp;
 import org.mule.farm.util.MockOutputStream;
 
@@ -49,7 +49,7 @@ public class FarmTest {
 	public void testLocalPut() {
 		assertEquals(
 				"Fetch the package from the Internet",
-				CLI.SUCCESS,
+				Barn.SUCCESS,
 				callFarmAppMainWithRepo("repo_eraseme", "put", "tomcat6x",
 						"apache-tomcat-6.0.33.zip"));
 	}
@@ -58,7 +58,7 @@ public class FarmTest {
 	public void testRemotePut() {
 		assertEquals(
 				"Fetch the package from the Internet",
-				CLI.SUCCESS,
+				Barn.SUCCESS,
 				callFarmAppMainWithRepo(
 						"repo_eraseme",
 						"put",
@@ -66,7 +66,7 @@ public class FarmTest {
 						"http://mirrors.axint.net/apache/tomcat/tomcat-6/v6.0.33/bin/apache-tomcat-6.0.33.zip"));
 		assertEquals(
 				"Fetch the package from the Internet",
-				CLI.SUCCESS,
+				Barn.SUCCESS,
 				callFarmAppMainWithRepo(
 						"repo_eraseme",
 						"install",
@@ -81,13 +81,13 @@ public class FarmTest {
 
 		assertEquals(
 				String.format("Adding [%s] to the repo", name),
-				CLI.SUCCESS,
+				Barn.SUCCESS,
 				callFarmAppMainWithRepo("repo_eraseme", "put", nameVersion,
 						zipFileName));
 
 		assertEquals(
 				String.format("Now I should retrieve [%s] successfully", name),
-				CLI.SUCCESS,
+				Barn.SUCCESS,
 				callFarmAppMainWithRepo("repo_eraseme", "install", name));
 
 		assertFolderExistence(name);
@@ -120,11 +120,11 @@ public class FarmTest {
 		assertEquals("No results found.\n", stderr.getContent());
 
 		assertEquals(
-				CLI.SUCCESS,
+				Barn.SUCCESS,
 				callFarmAppMainWithRepo("repo_eraseme", "put",
 						"jboss6x@6.1.0", "jboss6x-6.1.0.zip"));
 		assertEquals(
-				CLI.SUCCESS,
+				Barn.SUCCESS,
 				callFarmAppMainWithRepo("repo_eraseme", "put",
 						"tomcat7x@7.0.20", "apache-tomcat-7.0.20.zip"));
 

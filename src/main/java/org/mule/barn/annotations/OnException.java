@@ -1,4 +1,4 @@
-package org.mule.cli.annotations;
+package org.mule.barn.annotations;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -22,7 +22,7 @@ public @interface OnException {
 	String message();
 
 	/**
-	 * Return code that the CLI must return in case this happens. 
+	 * Return code that the Barn must return in case this happens. 
 	 */
 	int returnCode();
 }

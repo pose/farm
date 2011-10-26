@@ -1,12 +1,12 @@
-package org.mule.cli;
+package org.mule.barn;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
 import org.apache.commons.lang3.Validate;
-import org.mule.cli.annotations.Command;
-import org.mule.cli.annotations.OnException;
+import org.mule.barn.annotations.Command;
+import org.mule.barn.annotations.OnException;
 
 /**
  * Annotation based Command-Line Interface.
@@ -16,7 +16,7 @@ import org.mule.cli.annotations.OnException;
  * @param <T>
  *            Type of the annotated class.
  */
-public class CLI<T> {
+public class Barn<T> {
 
 	/**
 	 * Invalid parameters return code.
@@ -39,14 +39,22 @@ public class CLI<T> {
 	private Class<?> klass;
 
 	/**
-	 * Registers the instance for CLI parsing.
+	 * sh script name (in order to use it in help)
+	 */
+	private String appName;
+
+	/**
+	 * Registers the instance for Barn parsing.
 	 * 
 	 * @param instance
-	 *            annotated instance for CLI parsing
+	 *            annotated instance for Barn parsing
 	 */
-	public CLI(T instance) {
+	public Barn(T instance, String appName) {
 		Validate.notNull(instance);
+		Validate.notNull(appName);
+		Validate.notBlank(appName);
 
+		this.appName = appName;
 		this.instance = instance;
 		this.klass = instance.getClass();
 	}
@@ -61,7 +69,10 @@ public class CLI<T> {
 	 */
 	public int runCommandLine(String[] args) {
 		Validate.notNull(args);
-		Validate.notEmpty(args);
+		if (args.length == 0) {
+			help();
+			return SUCCESS;
+		}
 
 		for (Method method : klass.getMethods()) {
 			if (method.isAnnotationPresent(Command.class)
@@ -90,7 +101,27 @@ public class CLI<T> {
 				}
 			}
 		}
+		help();
 		return SUCCESS;
+	}
+
+	public void help() {
+		System.err.println("Usage: " + appName + " <command> [<args>]");
+		
+		
+		for (Method method : klass.getMethods()) {
+			
+			if (method.isAnnotationPresent(Command.class)) {
+				StringBuffer stringBuffer = new StringBuffer();
+				for (int i = 0; i < method.getParameterTypes().length; i++) {
+					stringBuffer.append(" <param").append(i).append(">");
+				}
+				
+				System.err.println(String.format("   %-7s %s", method.getName(),
+						stringBuffer.toString()));
+			}
+		}
+		
 	}
 
 }
